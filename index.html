@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberMiner - PET Rewards & Withdraw</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- MONETAG SDK CỦA BẠN -->
+    <script src='//libtl.com/sdk.js' data-zone='12211181' data-sdk='show_12211181'></script>
+
     <style>
         :root {
             --bg-color: #0b131e;
@@ -66,16 +70,11 @@
 
         .btn-withdraw-header {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 10px; right: 10px;
             background: var(--accent-blue);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 4px 8px;
-            font-size: 10px;
-            font-weight: bold;
-            cursor: pointer;
+            color: white; border: none;
+            border-radius: 6px; padding: 4px 8px;
+            font-size: 10px; font-weight: bold; cursor: pointer;
         }
 
         .stat-label { font-size: 11px; color: var(--sub-text); text-transform: uppercase; }
@@ -85,12 +84,8 @@
         .fiat-value { font-size: 11px; color: var(--accent-green); margin-top: 2px; }
 
         .section-title {
-            font-size: 13px;
-            font-weight: bold;
+            font-size: 13px; font-weight: bold;
             margin: 16px 0 10px 4px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         .task-card {
@@ -112,96 +107,27 @@
 
         .btn-ad {
             background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
-            line-height: 1.3;
+            color: #fff; border: none; border-radius: 10px;
+            padding: 10px 14px; font-size: 12px; font-weight: bold;
+            cursor: pointer; text-align: center; min-width: 140px;
             box-shadow: 0 2px 6px rgba(0,136,204,0.4);
-            min-width: 140px;
-        }
-
-        /* GIAO DIỆN KHUNG POPUP ADS NGOÀI CỬA SỔ TELEGRAM */
-        .ad-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92);
-            z-index: 999;
-            flex-direction: column;
-        }
-        .ad-modal.active { display: flex; }
-        .ad-header {
-            background: #152232;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #23374e;
-        }
-        .ad-iframe {
-            flex: 1;
-            width: 100%;
-            border: none;
         }
 
         /* GIAO DIỆN RÚT TIỀN */
-        .withdraw-card {
-            background-color: var(--card-bg);
-            border: 1px solid #23374e;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-
-        .badge-rate {
-            background: rgba(0, 210, 106, 0.15);
-            border: 1px solid var(--accent-green);
-            color: var(--accent-green);
-            font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
+        .withdraw-card { background-color: var(--card-bg); border: 1px solid #23374e; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+        .badge-rate { background: rgba(0, 210, 106, 0.15); border: 1px solid var(--accent-green); color: var(--accent-green); font-size: 11px; padding: 4px 8px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-weight: bold; }
         .method-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .method-tab {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid #23374e;
-            border-radius: 8px;
-            padding: 8px;
-            font-size: 12px;
-            color: var(--sub-text);
-            cursor: pointer;
-            text-align: center;
-        }
+        .method-tab { background: rgba(255, 255, 255, 0.05); border: 1px solid #23374e; border-radius: 8px; padding: 8px; font-size: 12px; color: var(--sub-text); cursor: pointer; text-align: center; }
         .method-tab.active { background: rgba(0, 153, 255, 0.15); border-color: var(--accent-blue); color: #fff; }
-
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 11px; color: var(--sub-text); margin-bottom: 6px; }
-        .form-input, .form-select {
-            width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid #23374e;
-            border-radius: 8px; padding: 10px; color: #fff; box-sizing: border-box; font-size: 13px;
-        }
-
+        .form-input, .form-select { width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid #23374e; border-radius: 8px; padding: 10px; color: #fff; box-sizing: border-box; font-size: 13px; }
         .quick-amounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
         .quick-btn { background: rgba(255,255,255,0.05); border: 1px solid #23374e; color: #fff; border-radius: 6px; padding: 6px 2px; font-size: 10px; cursor: pointer; }
-
-        .receive-box {
-            background: rgba(0, 210, 106, 0.08); border: 1px dashed var(--accent-green);
-            border-radius: 8px; padding: 12px; margin: 15px 0; display: flex; justify-content: space-between; align-items: center;
-        }
-
+        .receive-box { background: rgba(0, 210, 106, 0.08); border: 1px dashed var(--accent-green); border-radius: 8px; padding: 12px; margin: 15px 0; display: flex; justify-content: space-between; align-items: center; }
         .action-buttons { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
         .btn-cancel { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid #23374e; border-radius: 10px; padding: 12px; font-weight: bold; cursor: pointer; }
         .btn-submit { background: linear-gradient(135deg, #00d26a 0%, #00994d 100%); color: #fff; border: none; border-radius: 10px; padding: 12px; font-weight: bold; cursor: pointer; }
-
         .history-card { background-color: var(--card-bg); border: 1px solid #23374e; border-radius: 14px; padding: 12px; }
         .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #23374e; font-size: 12px; }
         .history-status { padding: 2px 6px; border-radius: 4px; font-size: 10px; background: rgba(255, 183, 3, 0.15); color: var(--accent-yellow); font-weight: bold; }
@@ -234,29 +160,20 @@
             </div>
         </div>
 
-        <div class="section-title">📺 TRẠM XEM QUẢNG CÁO MONETAG</div>
+        <div class="section-title">📺 TRẠM XEM QUẢNG CÁO MONETAG REWARDED</div>
 
         <div class="task-card">
             <div class="task-info">
                 <div class="task-icon">💎</div>
                 <div class="task-desc">
-                    <span class="task-name">Xem Monetag Ads Nhận PET</span>
+                    <span class="task-name">Xem Monetag Rewarded Ads</span>
                     <span class="task-reward text-blue">+0.2 PET</span>
                 </div>
             </div>
-            <button class="btn-ad" id="adBtn" onclick="startWatchAds(this)">
-                ▶ Xem Ads (15s)<br><small>+0.2 PET</small>
+            <button class="btn-ad" id="adBtn" onclick="watchMonetagAd(this)">
+                ▶ Xem Ads<br><small>+0.2 PET</small>
             </button>
         </div>
-    </div>
-
-    <!-- POPUP XEM ADS MONETAG TRONG KHUNG TELEGRAM -->
-    <div class="ad-modal" id="adModal">
-        <div class="ad-header">
-            <span style="font-size: 13px; font-weight: bold;" id="adTimerText">⏳ Đang xem quảng cáo (15s)...</span>
-            <button style="background: var(--danger-color, #ff3b30); color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer;" onclick="cancelAd()">Hủy Xem</button>
-        </div>
-        <iframe class="ad-iframe" id="adFrame" src="about:blank"></iframe>
     </div>
 
     <!-- GIAO DIỆN RÚT TIỀN -->
@@ -329,68 +246,26 @@
     </div>
 
     <script>
-        // LINK MONETAG DIRECT LINK CỦA BẠN
-        const MONETAG_LINK = "https://uplcm.com/4/12211150";
         const RATIO_VND = 7;
         let currentMethod = 'momo';
 
         let pet = parseFloat(localStorage.getItem('pet_bal')) || 0;
         let history = JSON.parse(localStorage.getItem('withdraw_history')) || [];
 
-        let watchTimer = null;
-        let currentBtn = null;
-        let originalText = "";
-
-        function cancelAd() {
-            if (watchTimer) {
-                clearInterval(watchTimer);
-                watchTimer = null;
-            }
-            document.getElementById('adModal').classList.remove('active');
-            document.getElementById('adFrame').src = "about:blank";
-            if (currentBtn) {
-                currentBtn.style.pointerEvents = "auto";
-                currentBtn.style.opacity = "1";
-                currentBtn.innerHTML = originalText;
-                currentBtn = null;
-            }
-        }
-
-        function startWatchAds(btn) {
-            currentBtn = btn;
-            originalText = btn.innerHTML;
-            btn.style.pointerEvents = "none";
-            btn.style.opacity = "0.5";
-
-            // Load Monetag Direct Link ngay trong Iframe của Telegram WebApp
-            document.getElementById('adFrame').src = MONETAG_LINK;
-            document.getElementById('adModal').classList.add('active');
-
-            let sec = 15;
-            let timerText = document.getElementById('adTimerText');
-            timerText.innerText = `⏳ Đang xem quảng cáo (${sec}s)...`;
-
-            watchTimer = setInterval(() => {
-                sec--;
-                timerText.innerText = `⏳ Đang xem quảng cáo (${sec}s)...`;
-
-                if (sec < 0) {
-                    clearInterval(watchTimer);
-                    watchTimer = null;
-                    
-                    document.getElementById('adModal').classList.remove('active');
-                    document.getElementById('adFrame').src = "about:blank";
-                    
-                    btn.style.pointerEvents = "auto";
-                    btn.style.opacity = "1";
-                    btn.innerHTML = originalText;
-
+        // HÀM KÍCH HOẠT QUẢNG CÁO MONETAG VÀ CỘNG THƯỞNG
+        function watchMonetagAd(btn) {
+            if (typeof show_12211181 === 'function') {
+                show_12211181().then(() => {
                     pet += 0.2;
                     localStorage.setItem('pet_bal', pet);
-                    alert("🎉 Bạn đã xem đủ 15s Monetag Ads! Nhận thành công +0.2 PET.");
+                    alert("🎉 Bạn đã xem xong quảng cáo! Nhận +0.2 PET.");
                     updateUI();
-                }
-            }, 1000);
+                }).catch((err) => {
+                    alert("Chưa hoàn thành xem quảng cáo hoặc chưa sẵn sàng.");
+                });
+            } else {
+                alert("Hệ thống quảng cáo đang khởi tạo, vui lòng bấm lại sau 2 giây!");
+            }
         }
 
         function switchScreen(screenId) {
