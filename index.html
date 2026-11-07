@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberMiner - PET Rewards & Withdraw</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b131e;
+            --card-bg: #152232;
+            --accent-blue: #0099ff;
+            --accent-green: #00d26a;
+            --accent-yellow: #ffb703;
+            --text-color: #ffffff;
+            --sub-text: #8b9bb4;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 12px;
+            user-select: none;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .header-card {
+            background: linear-gradient(135deg, #152232 0%, #1c2d42 100%);
+            border: 1px solid #23374e;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #23374e;
+            padding-bottom: 8px;
+        }
+
+        .user-id { font-size: 12px; color: var(--sub-text); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+        }
+
+        .btn-withdraw-header {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .stat-label { font-size: 11px; color: var(--sub-text); text-transform: uppercase; }
+        .stat-value { font-size: 16px; font-weight: bold; }
+        .text-yellow { color: var(--accent-yellow); }
+        .text-blue { color: var(--accent-blue); }
+        .text-green { color: var(--accent-green); }
+        .fiat-value { font-size: 11px; color: var(--accent-green); margin-top: 2px; }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin: 16px 0 10px 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .task-card {
+            background-color: var(--card-bg);
+            border: 1px solid #23374e;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .task-info { display: flex; align-items: center; gap: 10px; flex: 1; }
+        .task-icon { font-size: 24px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 10px; }
+        .task-desc { display: flex; flex-direction: column; }
+        .task-name { font-size: 12px; color: var(--sub-text); }
+        .task-reward { font-size: 14px; font-weight: bold; }
+
+        .btn-ad {
+            background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            line-height: 1.3;
+            box-shadow: 0 2px 6px rgba(0,136,204,0.4);
+            min-width: 130px;
+        }
+
+        /* GIAO DIỆN RÚT TIỀN */
+        .withdraw-card {
+            background-color: var(--card-bg);
+            border: 1px solid #23374e;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .badge-rate {
+            background: rgba(0, 210, 106, 0.15);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .method-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .method-tab {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #23374e;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 12px;
+            color: var(--sub-text);
+            cursor: pointer;
+            text-align: center;
+        }
+        .method-tab.active { background: rgba(0, 153, 255, 0.15); border-color: var(--accent-blue); color: #fff; }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 11px; color: var(--sub-text); margin-bottom: 6px; }
+        .form-input, .form-select {
+            width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid #23374e;
+            border-radius: 8px; padding: 10px; color: #fff; box-sizing: border-box; font-size: 13px;
+        }
+
+        .quick-amounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+        .quick-btn { background: rgba(255,255,255,0.05); border: 1px solid #23374e; color: #fff; border-radius: 6px; padding: 6px 2px; font-size: 10px; cursor: pointer; }
+
+        .receive-box {
+            background: rgba(0, 210, 106, 0.08); border: 1px dashed var(--accent-green);
+            border-radius: 8px; padding: 12px; margin: 15px 0; display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .action-buttons { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+        .btn-cancel { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid #23374e; border-radius: 10px; padding: 12px; font-weight: bold; cursor: pointer; }
+        .btn-submit { background: linear-gradient(135deg, #00d26a 0%, #00994d 100%); color: #fff; border: none; border-radius: 10px; padding: 12px; font-weight: bold; cursor: pointer; }
+
+        .history-card { background-color: var(--card-bg); border: 1px solid #23374e; border-radius: 14px; padding: 12px; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #23374e; font-size: 12px; }
+        .history-status { padding: 2px 6px; border-radius: 4px; font-size: 10px; background: rgba(255, 183, 3, 0.15); color: var(--accent-yellow); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- GIAO DIỆN CHÍNH -->
+    <div id="mainScreen" class="screen active">
+        <div class="header-card">
+            <div class="user-info">
+                <span style="font-weight: bold; color: #00d26a;">⚙️ CYBER MINER IDLE</span>
+                <span class="user-id" id="userId">ID: 8380491757</span>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-label">VÀNG (XEM ADS)</span>
+                    <span class="stat-value text-yellow" id="goldBalance">44,128</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">TOKEN PET ĐÀO ĐƯỢC</span>
+                    <span class="stat-value text-blue" id="petBalance">4787.424</span>
+                    <span class="fiat-value" id="vndBalance">≈ 33,511 VNĐ</span>
+                    <button class="btn-withdraw-header" onclick="switchScreen('withdrawScreen')">RÚT TIỀN</button>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">TỐC ĐỘ ĐÀO / GIÂY</span>
+                    <span class="stat-value text-green">0.008 PET/s</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">PHÍ RÚT TIỀN</span>
+                    <span class="stat-value text-green">0đ (FREE)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">📺 TRẠM XEM QUẢNG CÁO KIẾM PET & VÀNG</div>
+
+        <div class="task-card">
+            <div class="task-info">
+                <div class="task-icon">🪙</div>
+                <div class="task-desc">
+                    <span class="task-name">Nhận Vàng Nâng Cấp</span>
+                    <span class="task-reward text-yellow">+5 Vàng</span>
+                </div>
+            </div>
+            <button class="btn-ad" onclick="startWatchAds('gold', this)">
+                ▶ Xem Ads (15s)<br><small>+5 Vàng</small>
+            </button>
+        </div>
+
+        <div class="task-card">
+            <div class="task-info">
+                <div class="task-icon">💎</div>
+                <div class="task-desc">
+                    <span class="task-name">Xem Ads Nhận Trực Tiếp PET</span>
+                    <span class="task-reward text-blue">+0.2 PET</span>
+                </div>
+            </div>
+            <button class="btn-ad" onclick="startWatchAds('pet', this)">
+                ▶ Xem Ads (15s)<br><small>+0.2 PET</small>
+            </button>
+        </div>
+    </div>
+
+    <!-- GIAO DIỆN RÚT TIỀN -->
+    <div id="withdrawScreen" class="screen">
+        <div class="withdraw-card">
+            <div style="font-size: 15px; font-weight: bold; margin-bottom: 6px;">Rút Tiền Về MoMo, ZaloPay & Ngân Hàng (VNĐ)</div>
+            <div class="badge-rate">⚡ TỶ GIÁ QUY ĐỔI: 1 PET = 7 VNĐ</div>
+
+            <div style="display: flex; justify-content: space-between; margin: 12px 0; font-size: 13px;">
+                <div>Số dư Token PET:<br><strong class="text-blue" id="withdrawPetBal">4787.42 PET</strong></div>
+                <div style="text-align: right;">Giá trị quy đổi VNĐ:<br><strong class="text-green" id="withdrawVndBal">33,511 VNĐ</strong></div>
+            </div>
+
+            <div class="method-tabs">
+                <div class="method-tab active" onclick="setMethod('momo', this)">Ví MoMo</div>
+                <div class="method-tab" onclick="setMethod('zalopay', this)">Ví ZaloPay</div>
+                <div class="method-tab" onclick="setMethod('bank', this)">Ngân Hàng</div>
+            </div>
+
+            <div id="bankFields" style="display: none;">
+                <div class="form-group">
+                    <label>Chọn Ngân Hàng:</label>
+                    <select class="form-select" id="bankName">
+                        <option value="MB Bank">MB Bank (Quân Đội)</option>
+                        <option value="Vietcombank">Vietcombank</option>
+                        <option value="Techcombank">Techcombank</option>
+                        <option value="Agribank">Agribank</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label id="accountLabel">Số Tài Khoản MoMo / SĐT:</label>
+                <input type="text" class="form-input" id="accountNo" placeholder="Nhập số tài khoản/SĐT nhận tiền...">
+            </div>
+
+            <div class="form-group">
+                <label>Tên Chủ Tài Khoản (Viết hoa không dấu):</label>
+                <input type="text" class="form-input" id="accountName" placeholder="Ví dụ: NGUYEN VAN A" oninput="this.value = this.value.toUpperCase()">
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label>Số Token PET muốn rút (Tối thiểu 286 PET ~ 2.000 VNĐ):</label>
+                <input type="number" class="form-input" id="withdrawAmount" placeholder="Ví dụ: 286" oninput="calculateReceive()">
+                <div class="quick-amounts">
+                    <button class="quick-btn" onclick="setAmount(286)">286 PET (2k)</button>
+                    <button class="quick-btn" onclick="setAmount(1000)">1.000 PET (7k)</button>
+                    <button class="quick-btn" onclick="setAmount(5000)">5.000 PET (35k)</button>
+                    <button class="quick-btn" onclick="setAmount('all')">Tất Cả</button>
+                </div>
+            </div>
+
+            <div class="receive-box">
+                <span style="font-size: 12px; color: var(--sub-text);">Thực nhận:</span>
+                <span style="font-size: 16px; font-weight: bold; color: var(--accent-green);" id="receiveVnd">0 VNĐ</span>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-cancel" onclick="switchScreen('mainScreen')">Hủy</button>
+                <button class="btn-submit" onclick="submitWithdraw()">Xác Nhận Rút Tiền</button>
+            </div>
+        </div>
+
+        <div class="history-card">
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px;">📊 LỊCH SỬ LỆNH RÚT TIỀN:</div>
+            <div id="historyList">
+                <div style="text-align: center; color: var(--sub-text); font-size: 11px; padding: 10px 0;">Chưa có lệnh rút nào.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADSTERRA_LINK = "https://asiafilm.org/4/44ab335f933b5d525bc573a544946332";
+        const RATIO_VND = 7;
+        let currentMethod = 'momo';
+
+        let gold = parseFloat(localStorage.getItem('gold_bal')) || 44128;
+        let pet = parseFloat(localStorage.getItem('pet_bal')) || 4787.424;
+        let history = JSON.parse(localStorage.getItem('withdraw_history')) || [];
+
+        // Xử lý đếm ngược 15s xem Ads
+        function startWatchAds(type, btn) {
+            window.open(ADSTERRA_LINK, "_blank");
+
+            let sec = 15;
+            let originalText = btn.innerHTML;
+            btn.style.pointerEvents = "none";
+            btn.style.opacity = "0.5";
+
+            let timer = setInterval(() => {
+                btn.innerHTML = `⏳ Đang xem (${sec}s)...`;
+                sec--;
+
+                if (sec < 0) {
+                    clearInterval(timer);
+                    btn.style.pointerEvents = "auto";
+                    btn.style.opacity = "1";
+                    btn.innerHTML = originalText;
+
+                    if (type === 'gold') {
+                        gold += 5;
+                        localStorage.setItem('gold_bal', gold);
+                        alert("🎉 Hoàn thành! Bạn đã nhận +5 Vàng!");
+                    } else {
+                        pet += 0.2;
+                        localStorage.setItem('pet_bal', pet);
+                        alert("🎉 Hoàn thành! Bạn đã nhận +0.2 PET!");
+                    }
+                    updateUI();
+                }
+            }, 1000);
+        }
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            updateUI();
+        }
+
+        function setMethod(method, el) {
+            currentMethod = method;
+            document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('bankFields').style.display = method === 'bank' ? 'block' : 'none';
+        }
+
+        function calculateReceive() {
+            let amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
+            document.getElementById('receiveVnd').innerText = `${Math.round(amount * RATIO_VND).toLocaleString('vi-VN')} VNĐ`;
+        }
+
+        function setAmount(val) {
+            document.getElementById('withdrawAmount').value = val === 'all' ? Math.floor(pet) : val;
+            calculateReceive();
+        }
+
+        function submitWithdraw() {
+            let amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
+            let accountNo = document.getElementById('accountNo').value.trim();
+            let accountName = document.getElementById('accountName').value.trim();
+
+            if (amount < 286 || amount > pet || !accountNo || !accountName) {
+                alert("Vui lòng kiểm tra lại thông tin và số dư (rút tối thiểu 286 PET)!");
+                return;
+            }
+
+            pet -= amount;
+            localStorage.setItem('pet_bal', pet);
+
+            let newItem = {
+                date: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}),
+                amount: amount,
+                vnd: Math.round(amount * RATIO_VND),
+                status: 'Chờ duyệt'
+            };
+            history.unshift(newItem);
+            localStorage.setItem('withdraw_history', JSON.stringify(history));
+
+            alert("Gửi lệnh rút tiền thành công!");
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('goldBalance').innerText = gold.toLocaleString('vi-VN');
+            document.getElementById('petBalance').innerText = pet.toFixed(3);
+            let totalVnd = Math.round(pet * RATIO_VND);
+            document.getElementById('vndBalance').innerText = `≈ ${totalVnd.toLocaleString('vi-VN')} VNĐ`;
+
+            document.getElementById('withdrawPetBal').innerText = `${pet.toFixed(3)} PET`;
+            document.getElementById('withdrawVndBal').innerText = `${totalVnd.toLocaleString('vi-VN')} VNĐ`;
+
+            let list = document.getElementById('historyList');
+            if (history.length > 0) {
+                list.innerHTML = history.map(item => `
+                    <div class="history-item">
+                        <div><strong>Rút ${item.amount.toLocaleString('vi-VN')} PET</strong><br><small style="color: var(--sub-text);">${item.date}</small></div>
+                        <div style="text-align: right;"><span class="text-green">+${item.vnd.toLocaleString('vi-VN')} VNĐ</span><br><span class="history-status">${item.status}</span></div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+            let user = window.Telegram.WebApp.initDataUnsafe.user;
+            if (user && user.id) document.getElementById('userId').innerText = `ID: ${user.id}`;
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
