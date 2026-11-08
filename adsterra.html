@@ -162,7 +162,7 @@
                 </div>
             </div>
             <button class="btn-ad" id="adBtn" onclick="watchAdsterraAd(this)">
-                ▶ Xem Ads (30s)<br><small>+0.2 PET</small>
+                ▶ Xem Ads (15s)<br><small>+0.2 PET</small>
             </button>
         </div>
     </div>
@@ -240,8 +240,6 @@
         let currentMethod = 'momo';
 
         const ADMIN_ID = "8380491757"; 
-
-        // LINK ADSTERRA CỦA BẠN ĐÃ ĐƯỢC ĐIỀN CHUẨN XÁC
         const ADSTERRA_DIRECT_LINK = "https://asiafilm.org/4/44ab335f933b5d525bc573a544946332";
 
         let pet = parseFloat(localStorage.getItem('pet_bal_adsterra')) || 0;
@@ -250,9 +248,12 @@
         let watchTimer = null;
 
         function watchAdsterraAd(btn) {
+            if (watchTimer !== null) return;
+
+            // Mở Direct Link Adsterra sang tab mới
             window.open(ADSTERRA_DIRECT_LINK, '_blank');
 
-            let sec = 30;
+            let sec = 15;
             btn.style.pointerEvents = "none";
             btn.style.opacity = "0.5";
 
@@ -265,14 +266,12 @@
                     watchTimer = null;
                     btn.style.pointerEvents = "auto";
                     btn.style.opacity = "1";
-                    btn.innerHTML = `▶ Xem Ads (30s)<br><small>+0.2 PET</small>`;
+                    btn.innerHTML = `▶ Xem Ads (15s)<br><small>+0.2 PET</small>`;
 
                     pet += 0.2;
                     totalAdsWatched += 1;
                     localStorage.setItem('pet_bal_adsterra', pet);
                     localStorage.setItem('total_adsterra_watched', totalAdsWatched);
-
-                    alert("🎉 Bạn đã hoàn thành 30s xem Adsterra! Nhận thành công +0.2 PET.");
                     updateUI();
                 }
             }, 1000);
