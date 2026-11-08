@@ -165,7 +165,7 @@
                 </div>
             </div>
             <button class="btn-ad" id="adBtn" onclick="watchMonetagAd(this)">
-                ▶ Xem Ads (30s)<br><small>+0.2 PET</small>
+                ▶ Xem Ads<br><small>+0.2 PET</small>
             </button>
         </div>
     </div>
@@ -248,37 +248,34 @@
         let pet = parseFloat(localStorage.getItem('pet_bal')) || 0;
         let totalAdsWatched = parseInt(localStorage.getItem('total_ads_watched')) || 0;
         let history = JSON.parse(localStorage.getItem('withdraw_history')) || [];
-        let watchTimer = null;
 
         function watchMonetagAd(btn) {
-            if (watchTimer !== null) return;
-
             if (typeof show_12211181 === 'function') {
-                show_12211181();
-            }
+                btn.style.pointerEvents = "none";
+                btn.style.opacity = "0.5";
+                btn.innerHTML = "⏳ Đang phát Quảng cáo Monetag...";
 
-            let sec = 30;
-            btn.style.pointerEvents = "none";
-            btn.style.opacity = "0.5";
-
-            watchTimer = setInterval(() => {
-                btn.innerHTML = `⏳ Đang xem (${sec}s)...`;
-                sec--;
-
-                if (sec < 0) {
-                    clearInterval(watchTimer);
-                    watchTimer = null;
-                    btn.style.pointerEvents = "auto";
-                    btn.style.opacity = "1";
-                    btn.innerHTML = `▶ Xem Ads (30s)<br><small>+0.2 PET</small>`;
-
+                // Mở SDK Quảng cáo Monetag (Monetag tự đếm ngược 30s)
+                show_12211181().then(() => {
+                    // XEM ĐỦ 30S TRÊN GIAO DIỆN MONETAG MỚI CHẠY VÀO ĐÂY
                     pet += 0.2;
                     totalAdsWatched += 1;
                     localStorage.setItem('pet_bal', pet);
                     localStorage.setItem('total_ads_watched', totalAdsWatched);
+
+                    btn.style.pointerEvents = "auto";
+                    btn.style.opacity = "1";
+                    btn.innerHTML = `▶ Xem Ads<br><small>+0.2 PET</small>`;
                     updateUI();
-                }
-            }, 1000);
+                }).catch((err) => {
+                    // Bấm tắt giữa chừng hoặc chưa xem hết -> Không cộng điểm
+                    btn.style.pointerEvents = "auto";
+                    btn.style.opacity = "1";
+                    btn.innerHTML = `▶ Xem Ads<br><small>+0.2 PET</small>`;
+                });
+            } else {
+                alert("Hệ thống quảng cáo đang khởi tạo, vui lòng bấm lại!");
+            }
         }
 
         function switchScreen(screenId) {
