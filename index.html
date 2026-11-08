@@ -167,7 +167,7 @@
                 </div>
             </div>
             <button class="btn-ad" id="adBtn" onclick="watchMonetagAd(this)">
-                ▶ Xem Ads<br><small>+0.2 PET</small>
+                ▶ Xem Ads (30s)<br><small>+0.2 PET</small>
             </button>
         </div>
     </div>
@@ -245,16 +245,36 @@
         const RATIO_VND = 7;
         let currentMethod = 'momo';
 
+        // KHỞI TẠO HOẶC LẤY SỐ DƯ TỪ LOCALSTORAGE
         let pet = parseFloat(localStorage.getItem('pet_bal')) || 0;
         let history = JSON.parse(localStorage.getItem('withdraw_history')) || [];
+        let watchTimer = null;
 
         function watchMonetagAd(btn) {
             if (typeof show_12211181 === 'function') {
                 show_12211181().then(() => {
-                    pet += 0.2;
-                    localStorage.setItem('pet_bal', pet);
-                    alert("🎉 Bạn đã xem xong quảng cáo! Nhận +0.2 PET.");
-                    updateUI();
+                    let sec = 30;
+                    btn.style.pointerEvents = "none";
+                    btn.style.opacity = "0.5";
+
+                    watchTimer = setInterval(() => {
+                        btn.innerHTML = `⏳ Xác minh (${sec}s)...`;
+                        sec--;
+
+                        if (sec < 0) {
+                            clearInterval(watchTimer);
+                            watchTimer = null;
+                            btn.style.pointerEvents = "auto";
+                            btn.style.opacity = "1";
+                            btn.innerHTML = `▶ Xem Ads (30s)<br><small>+0.2 PET</small>`;
+
+                            pet += 0.2;
+                            localStorage.setItem('pet_bal', pet);
+                            alert("🎉 Bạn đã xem đủ 30s quảng cáo! Nhận thành công +0.2 PET.");
+                            updateUI();
+                        }
+                    }, 1000);
+
                 }).catch((err) => {
                     alert("Chưa hoàn thành xem quảng cáo hoặc chưa sẵn sàng.");
                 });
@@ -328,6 +348,8 @@
                         <div style="text-align: right;"><span class="text-green">+${item.vnd.toLocaleString('vi-VN')} VNĐ</span><br><span class="history-status">${item.status}</span></div>
                     </div>
                 `).join('');
+            } else {
+                list.innerHTML = `<div style="text-align: center; color: var(--sub-text); font-size: 11px; padding: 10px 0;">Chưa có lệnh rút nào.</div>`;
             }
         }
 
