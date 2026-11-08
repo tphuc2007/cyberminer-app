@@ -54,14 +54,14 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 10px;
         }
 
         .stat-box {
             background: rgba(0, 0, 0, 0.2);
             border-radius: 12px;
-            padding: 10px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -70,18 +70,18 @@
 
         .btn-withdraw-header {
             position: absolute;
-            top: 10px; right: 10px;
+            top: 12px; right: 12px;
             background: var(--accent-blue);
             color: white; border: none;
-            border-radius: 6px; padding: 4px 8px;
-            font-size: 10px; font-weight: bold; cursor: pointer;
+            border-radius: 6px; padding: 6px 12px;
+            font-size: 11px; font-weight: bold; cursor: pointer;
         }
 
         .stat-label { font-size: 11px; color: var(--sub-text); text-transform: uppercase; }
-        .stat-value { font-size: 16px; font-weight: bold; }
+        .stat-value { font-size: 18px; font-weight: bold; }
         .text-blue { color: var(--accent-blue); }
         .text-green { color: var(--accent-green); }
-        .fiat-value { font-size: 11px; color: var(--accent-green); margin-top: 2px; }
+        .fiat-value { font-size: 12px; color: var(--accent-green); margin-top: 2px; }
 
         .section-title {
             font-size: 13px; font-weight: bold;
@@ -150,10 +150,6 @@
                     <button class="btn-withdraw-header" onclick="switchScreen('withdrawScreen')">RÚT TIỀN</button>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">TỐC ĐỘ ĐÀO / GIÂY</span>
-                    <span class="stat-value text-green">0.008 PET/s</span>
-                </div>
-                <div class="stat-box" style="grid-column: span 2;">
                     <span class="stat-label">PHÍ RÚT TIỀN TIÊU CHUẨN</span>
                     <span class="stat-value text-green">0đ (FREE)</span>
                 </div>
@@ -216,12 +212,12 @@
             </div>
 
             <div class="form-group" style="margin-top: 15px;">
-                <label>Số Token PET muốn rút (Tối thiểu 286 PET ~ 2.000 VNĐ):</label>
-                <input type="number" class="form-input" id="withdrawAmount" placeholder="Ví dụ: 286" oninput="calculateReceive()">
+                <label>Số Token PET muốn rút (Tối thiểu 1.429 PET ~ 10.000 VNĐ):</label>
+                <input type="number" class="form-input" id="withdrawAmount" placeholder="Ví dụ: 1429" oninput="calculateReceive()">
                 <div class="quick-amounts">
-                    <button class="quick-btn" onclick="setAmount(286)">286 PET (2k)</button>
-                    <button class="quick-btn" onclick="setAmount(1000)">1.000 PET (7k)</button>
-                    <button class="quick-btn" onclick="setAmount(5000)">5.000 PET (35k)</button>
+                    <button class="quick-btn" onclick="setAmount(1429)">1.429 PET (10k)</button>
+                    <button class="quick-btn" onclick="setAmount(2858)">2.858 PET (20k)</button>
+                    <button class="quick-btn" onclick="setAmount(7143)">7.143 PET (50k)</button>
                     <button class="quick-btn" onclick="setAmount('all')">Tất Cả</button>
                 </div>
             </div>
@@ -252,7 +248,6 @@
         let pet = parseFloat(localStorage.getItem('pet_bal')) || 0;
         let history = JSON.parse(localStorage.getItem('withdraw_history')) || [];
 
-        // HÀM KÍCH HOẠT QUẢNG CÁO MONETAG VÀ CỘNG THƯỞNG
         function watchMonetagAd(btn) {
             if (typeof show_12211181 === 'function') {
                 show_12211181().then(() => {
@@ -296,8 +291,8 @@
             let accountNo = document.getElementById('accountNo').value.trim();
             let accountName = document.getElementById('accountName').value.trim();
 
-            if (amount < 286 || amount > pet || !accountNo || !accountName) {
-                alert("Vui lòng kiểm tra lại thông tin và số dư (rút tối thiểu 286 PET)!");
+            if (amount < 1429 || amount > pet || !accountNo || !accountName) {
+                alert("Vui lòng kiểm tra lại thông tin và số dư (rút tối thiểu 1.429 PET ~ 10.000 VNĐ)!");
                 return;
             }
 
