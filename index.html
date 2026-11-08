@@ -135,7 +135,6 @@
 </head>
 <body>
 
-    <!-- GIAO DIỆN CHÍNH -->
     <div id="mainScreen" class="screen active">
         <div class="header-card">
             <div class="user-info">
@@ -172,7 +171,6 @@
         </div>
     </div>
 
-    <!-- GIAO DIỆN RÚT TIỀN -->
     <div id="withdrawScreen" class="screen">
         <div class="withdraw-card">
             <div style="font-size: 15px; font-weight: bold; margin-bottom: 6px;">Rút Tiền Về MoMo, ZaloPay & Ngân Hàng (VNĐ)</div>
@@ -229,7 +227,7 @@
 
             <div class="action-buttons">
                 <button class="btn-cancel" onclick="switchScreen('mainScreen')">Hủy</button>
-                <button class="btn-submit" onclick="submitWithdraw()">Xác Nhận Rút Tiền</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitWithdraw()">Xác Nhận Rút Tiền</button>
             </div>
         </div>
 
@@ -245,8 +243,12 @@
         const RATIO_VND = 7;
         let currentMethod = 'momo';
 
-        // KHỞI TẠO HOẶC LẤY SỐ DƯ TỪ LOCALSTORAGE
+        // CẤU HÌNH BOT TELEGRAM ĐỂ NHẬN BÁO LỆNH RÚT TIỀN VỀ ADMIN
+        const BOT_TOKEN = "9183289863:AAGo4CdGesu65qGtFGU5tz72tGiT_2ldDqQ"; // Token bot của bạn
+        const ADMIN_ID = "8380491757"; // ID Telegram cá nhân của bạn
+
         let pet = parseFloat(localStorage.getItem('pet_bal')) || 0;
+        let totalAdsWatched = parseInt(localStorage.getItem('total_ads_watched')) || 0;
         let history = JSON.parse(localStorage.getItem('withdraw_history')) || [];
         let watchTimer = null;
 
@@ -269,7 +271,10 @@
                             btn.innerHTML = `▶ Xem Ads (30s)<br><small>+0.2 PET</small>`;
 
                             pet += 0.2;
+                            totalAdsWatched += 1;
                             localStorage.setItem('pet_bal', pet);
+                            localStorage.setItem('total_ads_watched', totalAdsWatched);
+
                             alert("🎉 Bạn đã xem đủ 30s quảng cáo! Nhận thành công +0.2 PET.");
                             updateUI();
                         }
@@ -306,30 +311,71 @@
             calculateReceive();
         }
 
-        function submitWithdraw() {
+        async function submitWithdraw() {
             let amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
             let accountNo = document.getElementById('accountNo').value.trim();
             let accountName = document.getElementById('accountName').value.trim();
+            let bankName = document.getElementById('bankName').value;
 
             if (amount < 1429 || amount > pet || !accountNo || !accountName) {
                 alert("Vui lòng kiểm tra lại thông tin và số dư (rút tối thiểu 1.429 PET ~ 10.000 VNĐ)!");
                 return;
             }
 
-            pet -= amount;
-            localStorage.setItem('pet_bal', pet);
+            let btnSubmit = document.getElementById('submitBtn');
+            btnSubmit.innerText = "Đang gửi lệnh...";
+            btnSubmit.disabled = true;
 
-            let newItem = {
-                date: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}),
-                amount: amount,
-                vnd: Math.round(amount * RATIO_VND),
-                status: 'Chờ duyệt'
-            };
-            history.unshift(newItem);
-            localStorage.setItem('withdraw_history', JSON.stringify(history));
+            let telegramUser = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp.initDataUnsafe.user : null;
+            let userId = telegramUser ? telegramUser.id : "Không xác định";
+            let userName = telegramUser ? (telegramUser.username ? `@${telegramUser.username}` : telegramUser.first_name) : "Khách";
 
-            alert("Gửi lệnh rút tiền thành công!");
-            updateUI();
+            let receiveVnd = Math.round(amount * RATIO_VND);
+            let methodStr = currentMethod === 'bank' ? `Ngân hàng (${bankName})` : (currentMethod === 'momo' ? 'MoMo' : 'ZaloPay');
+
+            // NỘI DUNG THÔNG BÁO BÁO VỀ TELEGRAM ADMIN
+            let adminMessage = `🔔 **CÓ LỆNH RÚT TIỀN MỚI!**\n\n` +
+                `👤 **Người rút:** ${userName} (ID: \`${userId}\`)\n` +
+                `💰 **Số PET rút:** ${amount.toLocaleString('vi-VN')} PET\n` +
+                `💵 **Quy đổi VNĐ:** ${receiveVnd.toLocaleString('vi-VN')} VNĐ\n` +
+                `🏦 **Phương thức:** ${methodStr}\n` +
+                `💳 **Số tài khoản:** \`${accountNo}\`\n` +
+                `📝 **Tên chủ TK:** ${accountName}\n\n` +
+                `📊 **ĐỐI SOÁT BẢO MẬT:**\n` +
+                `👁 Total Ads Đã Xem: ${totalAdsWatched} lượt\n` +
+                `✅ Yêu cầu tối thiểu: ${Math.ceil(amount / 0.2)} lượt xem`;
+
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: ADMIN_ID,
+                        text: adminMessage,
+                        parse_mode: 'Markdown'
+                    })
+                });
+
+                pet -= amount;
+                localStorage.setItem('pet_bal', pet);
+
+                let newItem = {
+                    date: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}),
+                    amount: amount,
+                    vnd: receiveVnd,
+                    status: 'Chờ duyệt'
+                };
+                history.unshift(newItem);
+                localStorage.setItem('withdraw_history', JSON.stringify(history));
+
+                alert("Gửi lệnh rút tiền thành công! Admin sẽ duyệt và chuyển khoản cho bạn sớm nhất.");
+                updateUI();
+            } catch (e) {
+                alert("Lỗi kết nối khi gửi lệnh rút. Vui lòng thử lại!");
+            } finally {
+                btnSubmit.innerText = "Xác Nhận Rút Tiền";
+                btnSubmit.disabled = false;
+            }
         }
 
         function updateUI() {
