@@ -113,7 +113,6 @@
             box-shadow: 0 2px 6px rgba(0,136,204,0.4);
         }
 
-        /* GIAO DIỆN RÚT TIỀN */
         .withdraw-card { background-color: var(--card-bg); border: 1px solid #23374e; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
         .badge-rate { background: rgba(0, 210, 106, 0.15); border: 1px solid var(--accent-green); color: var(--accent-green); font-size: 11px; padding: 4px 8px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-weight: bold; }
         .method-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
@@ -243,9 +242,8 @@
         const RATIO_VND = 7;
         let currentMethod = 'momo';
 
-        // CẤU HÌNH BOT TELEGRAM ĐỂ NHẬN BÁO LỆNH RÚT TIỀN VỀ ADMIN
-        const BOT_TOKEN = "9183289863:AAGo4CdGesu65qGtFGU5tz72tGiT_2ldDqQ"; // Token bot của bạn
-        const ADMIN_ID = "8380491757"; // ID Telegram cá nhân của bạn
+        const BOT_TOKEN = "9183289863:AAGo4CdGesu65qGtFGU5tz72tGiT_2ldDqQ";
+        const ADMIN_ID = "8380491757";
 
         let pet = parseFloat(localStorage.getItem('pet_bal')) || 0;
         let totalAdsWatched = parseInt(localStorage.getItem('total_ads_watched')) || 0;
@@ -253,39 +251,34 @@
         let watchTimer = null;
 
         function watchMonetagAd(btn) {
+            if (watchTimer !== null) return;
+
             if (typeof show_12211181 === 'function') {
-                show_12211181().then(() => {
-                    let sec = 30;
-                    btn.style.pointerEvents = "none";
-                    btn.style.opacity = "0.5";
-
-                    watchTimer = setInterval(() => {
-                        btn.innerHTML = `⏳ Xác minh (${sec}s)...`;
-                        sec--;
-
-                        if (sec < 0) {
-                            clearInterval(watchTimer);
-                            watchTimer = null;
-                            btn.style.pointerEvents = "auto";
-                            btn.style.opacity = "1";
-                            btn.innerHTML = `▶ Xem Ads (30s)<br><small>+0.2 PET</small>`;
-
-                            pet += 0.2;
-                            totalAdsWatched += 1;
-                            localStorage.setItem('pet_bal', pet);
-                            localStorage.setItem('total_ads_watched', totalAdsWatched);
-
-                            alert("🎉 Bạn đã xem đủ 30s quảng cáo! Nhận thành công +0.2 PET.");
-                            updateUI();
-                        }
-                    }, 1000);
-
-                }).catch((err) => {
-                    alert("Chưa hoàn thành xem quảng cáo hoặc chưa sẵn sàng.");
-                });
-            } else {
-                alert("Hệ thống quảng cáo đang khởi tạo, vui lòng bấm lại sau 2 giây!");
+                show_12211181();
             }
+
+            let sec = 30;
+            btn.style.pointerEvents = "none";
+            btn.style.opacity = "0.5";
+
+            watchTimer = setInterval(() => {
+                btn.innerHTML = `⏳ Đang xem (${sec}s)...`;
+                sec--;
+
+                if (sec < 0) {
+                    clearInterval(watchTimer);
+                    watchTimer = null;
+                    btn.style.pointerEvents = "auto";
+                    btn.style.opacity = "1";
+                    btn.innerHTML = `▶ Xem Ads (30s)<br><small>+0.2 PET</small>`;
+
+                    pet += 0.2;
+                    totalAdsWatched += 1;
+                    localStorage.setItem('pet_bal', pet);
+                    localStorage.setItem('total_ads_watched', totalAdsWatched);
+                    updateUI();
+                }
+            }, 1000);
         }
 
         function switchScreen(screenId) {
@@ -333,8 +326,7 @@
             let receiveVnd = Math.round(amount * RATIO_VND);
             let methodStr = currentMethod === 'bank' ? `Ngân hàng (${bankName})` : (currentMethod === 'momo' ? 'MoMo' : 'ZaloPay');
 
-            // NỘI DUNG THÔNG BÁO BÁO VỀ TELEGRAM ADMIN
-            let adminMessage = `🔔 **CÓ LỆNH RÚT TIỀN MỚI!**\n\n` +
+            let adminMessage = `🔔 **CÓ LỆNH RÚT TIỀN MỚI (BOT MONETAG)!**\n\n` +
                 `👤 **Người rút:** ${userName} (ID: \`${userId}\`)\n` +
                 `💰 **Số PET rút:** ${amount.toLocaleString('vi-VN')} PET\n` +
                 `💵 **Quy đổi VNĐ:** ${receiveVnd.toLocaleString('vi-VN')} VNĐ\n` +
@@ -368,10 +360,10 @@
                 history.unshift(newItem);
                 localStorage.setItem('withdraw_history', JSON.stringify(history));
 
-                alert("Gửi lệnh rút tiền thành công! Admin sẽ duyệt và chuyển khoản cho bạn sớm nhất.");
+                alert("Gửi lệnh rút tiền thành công!");
                 updateUI();
             } catch (e) {
-                alert("Lỗi kết nối khi gửi lệnh rút. Vui lòng thử lại!");
+                alert("Lỗi kết nối khi gửi lệnh!");
             } finally {
                 btnSubmit.innerText = "Xác Nhận Rút Tiền";
                 btnSubmit.disabled = false;
