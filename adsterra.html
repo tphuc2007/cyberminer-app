@@ -110,7 +110,6 @@
             box-shadow: 0 2px 6px rgba(255,153,0,0.4);
         }
 
-        /* GIAO DIỆN RÚT TIỀN */
         .withdraw-card { background-color: var(--card-bg); border: 1px solid #23374e; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
         .badge-rate { background: rgba(0, 210, 106, 0.15); border: 1px solid var(--accent-green); color: var(--accent-green); font-size: 11px; padding: 4px 8px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-weight: bold; }
         .method-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
@@ -240,12 +239,10 @@
         const RATIO_VND = 7;
         let currentMethod = 'momo';
 
-        // THAY DỰA THEO CẤU HÌNH CỦA BẠN
-        const BOT_TOKEN = "DÁN_TOKEN_BOT_2_VÀO_ĐÂY"; 
         const ADMIN_ID = "8380491757"; 
 
-        // THAY BẰNG DIRECT LINK ADSTERRA CỦA BẠN (VD: https://www.highrevenuegate.com/xxxxxx)
-        const ADSTERRA_DIRECT_LINK = "DÁN_DIRECT_LINK_ADSTERRA_CỦA_BẠN_VÀO_ĐÂY";
+        // LINK ADSTERRA CỦA BẠN ĐÃ ĐƯỢC ĐIỀN CHUẨN XÁC
+        const ADSTERRA_DIRECT_LINK = "https://asiafilm.org/4/44ab335f933b5d525bc573a544946332";
 
         let pet = parseFloat(localStorage.getItem('pet_bal_adsterra')) || 0;
         let totalAdsWatched = parseInt(localStorage.getItem('total_adsterra_watched')) || 0;
@@ -253,12 +250,6 @@
         let watchTimer = null;
 
         function watchAdsterraAd(btn) {
-            if (!ADSTERRA_DIRECT_LINK || ADSTERRA_DIRECT_LINK.includes("DÁN_DIRECT_LINK")) {
-                alert("Chưa cấu hình Direct Link Adsterra!");
-                return;
-            }
-
-            // Mở Direct Link Adsterra sang tab mới
             window.open(ADSTERRA_DIRECT_LINK, '_blank');
 
             let sec = 30;
@@ -344,7 +335,7 @@
                 `✅ Yêu cầu tối thiểu: ${Math.ceil(amount / 0.2)} lượt xem`;
 
             try {
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                await fetch(`https://api.telegram.org/bot9156740956:AAHpmGvpI03l_rWdM_Rn8EzZkw3jVfzzmts/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
